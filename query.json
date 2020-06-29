@@ -1,5 +1,9 @@
 {
     "jsonQuery": {
+        "prepay": {
+            "type": "term",
+            "value": 1
+        },
         "_type": "flatrent",
         "room": {
             "type": "terms",
@@ -8,6 +12,10 @@
                 2,
                 9
             ]
+        },
+        "has_fridge": {
+            "type": "term",
+            "value": true
         },
         "for_day": {
             "type": "term",
@@ -19,6 +27,12 @@
                 "lte": 40000
             }
         },
+        "total_area": {
+            "type": "range",
+            "value": {
+                "gte": 30
+            }
+        },
         "engine_version": {
             "type": "term",
             "value": 2
@@ -26,6 +40,14 @@
         "currency": {
             "type": "term",
             "value": 2
+        },
+        "only_flat": {
+            "type": "term",
+            "value": true
+        },
+        "has_washer": {
+            "type": "term",
+            "value": true
         },
         "geo": {
             "type": "geo",
