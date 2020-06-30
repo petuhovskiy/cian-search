@@ -10,6 +10,8 @@ import (
 	"net/http"
 	"os"
 	"strconv"
+	"strings"
+	"time"
 
 	"github.com/davecgh/go-spew/spew"
 	"github.com/petuhovskiy/cian-search/jsv"
@@ -101,6 +103,7 @@ func fixHeader(cli *sheets.Service, sample map[string]string) (map[string]int, e
 	if err != nil {
 		return nil, fmt.Errorf("Unable to retrieve data from sheet: %w", err)
 	}
+	spew.Dump(resp)
 
 	mx := 0
 
@@ -181,7 +184,6 @@ func colorRowRed(cli *sheets.Service, row int) error {
 	}
 
 	resp, err := cli.Spreadsheets.BatchUpdate(sheetID, req).Do()
-	spew.Dump(resp, err)
 	if err != nil {
 		return err
 	}
@@ -199,40 +201,82 @@ func writeValue(cli *sheets.Service, row int, column int, val interface{}) error
 		Update(sheetID, rng, value).
 		ValueInputOption("USER_ENTERED").
 		Do()
-	spew.Dump(wResp, err)
+	return err
+}
+
+type sheetWrite struct {
+	row int
+	col int
+	val interface{}
+}
+
+func writeManyInRow(cli *sheets.Service, arr []sheetWrite) error {
+	mn := 1
+	mx := 1
+	for _, v := range arr {
+		if v.col > mx {
+			mx = v.col
+		}
+
+		if v.row != arr[0].row {
+			return fmt.Errorf("mismatching row, %v and %v", v.row, arr[0].row)
+		}
+	}
+
+	vals := make([]interface{}, mx)
+	for _, v := range arr {
+		vals[v.col-1] = v.val
+	}
+
+	value := &sheets.ValueRange{
+		Values: [][]interface{}{vals},
+	}
+
+	rng := rangeOf("%v%v:%v%v", letter(mn), arr[0].row, letter(mx), arr[0].row)
+	wResp, err := cli.Spreadsheets.Values.
+		Update(sheetID, rng, value).
+		ValueInputOption("USER_ENTERED").
+		Do()
 	return err
 }
 
 func updateRow(cli *sheets.Service, row int, header map[string]int, offer nometa.Offer) error {
+	// sleeping before update row
+	time.Sleep(time.Second)
+
 	cur, err := jsv.Marshal(offer)
 	if err != nil {
 		return err
 	}
 
+	var updates []sheetWrite
 	for k, v := range cur {
 		pos, ok := header[k]
 		if !ok {
 			return fmt.Errorf("header %v not found", k)
 		}
 
-		err := writeValue(cli, row, pos, v)
-		if err != nil {
-			return err
-		}
+		updates = append(updates, sheetWrite{
+			row: row,
+			col: pos,
+			val: v,
+		})
 	}
 
-	return nil
+	return writeManyInRow(cli, updates)
 }
 
 func main() {
 	var credsFile string
 	var resultFile string
+	var startRow int
 
 	flag.StringVar(&credsFile, "creds", "credentials.json", "path to google creds.json file")
 	flag.StringVar(&sheetID, "sheet", "value_here", "google sheet doc id")
 	flag.StringVar(&tokenFile, "tokenfile", "token.json", "path to save oauth token")
 	flag.StringVar(&resultFile, "result", "result.json", "path with cian results")
 	flag.StringVar(&sheetPage, "page", "Sheet1", "google sheets bottom page")
+	flag.IntVar(&startRow, "startRow", 2, "row to start iteration from")
 	flag.Parse()
 
 	b, err := ioutil.ReadFile(credsFile)
@@ -286,13 +330,14 @@ func main() {
 	fromTable := make(map[string]int)
 
 	mxLine := 1
-	for i := 2; i < 10; i++ {
+	for i := startRow; ; i++ {
+		log.Printf("Progress: line %d", i)
+
 		readRange := rangeOf("A%d:%d", i, i)
 		resp, err := cli.Spreadsheets.Values.Get(sheetID, readRange).Do()
 		if err != nil {
 			panic(err)
 		}
-		spew.Dump(resp.Values)
 
 		if len(resp.Values) == 0 {
 			break
@@ -300,11 +345,23 @@ func main() {
 		mxLine = i
 
 		currentCianID := valueGet(header["CianID"], resp.Values)
+		currentCianID = strings.ReplaceAll(currentCianID, ",", "")
 		fromTable[currentCianID] = i
+
+		if valueGet(header["IsDeleted"]) == "TRUE" {
+			continue
+		}
 
 		offer, ok := resultsMap[currentCianID]
 		if !ok {
 			err := colorRowRed(cli, i)
+			if err != nil {
+				panic(err)
+			}
+			time.Sleep(time.Second)
+
+			offer.IsDeleted = true
+			err = writeValue(cli, i, header["IsDeleted"], "TRUE")
 			if err != nil {
 				panic(err)
 			}

@@ -9,12 +9,8 @@ type User struct {
 	CompanyName       string `json:"companyName"`
 	Experience        string `json:"experience"`
 
-	IsAgent            bool `json:"isAgent"`
-	IsBuilder          bool `json:"isBuilder"`
-	IsCallbackUser     bool `json:"isCallbackUser"`
-	IsPassportVerified bool `json:"isPassportVerified"`
-	IsSelfEmployed     bool `json:"isSelfEmployed"`
-	IsSubAgent         bool `json:"isSubAgent"`
+	IsAgent    bool `json:"isAgent"`
+	IsSubAgent bool `json:"isSubAgent"`
 
 	UserTrustLevel string `json:"userTrustLevel"`
 
@@ -25,19 +21,15 @@ type User struct {
 
 func ConvertUser(u cian.User) User {
 	return User{
-		AccountType:        u.AccountType,
-		AgencyName:         u.AgencyName,
-		CianProfileStatus:  u.CianProfileStatus,
-		CompanyName:        u.CompanyName,
-		Experience:         u.Experience,
-		IsAgent:            u.IsAgent,
-		IsBuilder:          u.IsBuilder,
-		IsCallbackUser:     u.IsCallbackUser,
-		IsPassportVerified: u.IsPassportVerified,
-		IsSelfEmployed:     u.IsSelfEmployed,
-		IsSubAgent:         u.IsSubAgent,
-		UserTrustLevel:     u.UserTrustLevel,
-		UserType:           u.UserType,
-		IsCianPartner:      u.IsCianPartner,
+		AccountType:       u.AccountType,
+		AgencyName:        u.AgencyName,
+		CianProfileStatus: u.CianProfileStatus,
+		CompanyName:       u.CompanyName,
+		Experience:        u.Experience,
+		IsAgent:           u.IsAgent,
+		IsSubAgent:        u.IsSubAgent,
+		UserTrustLevel:    u.UserTrustLevel,
+		UserType:          u.UserType,
+		IsCianPartner:     u.IsCianPartner,
 	}
 }

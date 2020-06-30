@@ -9,6 +9,7 @@ import (
 
 type Offer struct {
 	IsRecidivist bool // ????
+	HomeOwner    bool
 	Building     Building
 	CianID       int
 	CianURL      string
@@ -31,11 +32,13 @@ type Offer struct {
 	IsApartaments bool
 	User          User
 	IsPro         bool
+	IsDeleted     bool
 }
 
 func ConvertOffer(o cian.OffersSerialized) Offer {
 	return Offer{
 		IsRecidivist:  o.IsRecidivist,
+		HomeOwner:     o.IsByHomeowner,
 		Building:      ConvertBuilding(o.Building),
 		CianID:        o.CianID,
 		CianURL:       fmt.Sprintf("https://www.cian.ru/rent/flat/%d/", o.CianID),
@@ -53,5 +56,6 @@ func ConvertOffer(o cian.OffersSerialized) Offer {
 		IsApartaments: o.IsApartments,
 		User:          ConvertUser(o.User),
 		IsPro:         o.IsPro,
+		IsDeleted:     false,
 	}
 }

@@ -114,7 +114,7 @@ type Building struct {
 	PassengerLiftsCount int         `json:"passengerLiftsCount"`
 }
 type UtilitiesTerms struct {
-	Price                        int         `json:"price"`
+	Price                        float64     `json:"price"`
 	FlowMetersNotIncludedInPrice interface{} `json:"flowMetersNotIncludedInPrice"`
 	IncludedInPrice              bool        `json:"includedInPrice"`
 }
