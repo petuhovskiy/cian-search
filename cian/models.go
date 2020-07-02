@@ -129,7 +129,7 @@ type BargainTerms struct {
 	ClientFee         int            `json:"clientFee"`
 	VatType           interface{}    `json:"vatType"`
 	AgentFee          int            `json:"agentFee"`
-	Price             int            `json:"price"`
+	Price             float64        `json:"price"`
 	PriceType         string         `json:"priceType"`
 	LeaseTermType     string         `json:"leaseTermType"`
 	LeaseType         interface{}    `json:"leaseType"`
@@ -147,14 +147,14 @@ type Coordinates struct {
 	Lat float64 `json:"lat"`
 }
 type Railways struct {
-	Name         string  `json:"name"`
-	DirectionIds []int   `json:"directionIds"`
-	Time         int     `json:"time"`
-	TravelType   string  `json:"travelType"`
-	GeoType      string  `json:"geoType"`
-	Distance     float64 `json:"distance"`
-	ID           int     `json:"id"`
-	Qs           string  `json:"qs"`
+	Name         string      `json:"name"`
+	DirectionIds []int       `json:"directionIds"`
+	Time         int         `json:"time"`
+	TravelType   string      `json:"travelType"`
+	GeoType      string      `json:"geoType"`
+	Distance     interface{} `json:"distance"`
+	ID           int         `json:"id"`
+	Qs           string      `json:"qs"`
 }
 type Districts struct {
 	Name       string `json:"name"`

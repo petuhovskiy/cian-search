@@ -48,7 +48,7 @@ func ConvertOffer(o cian.OffersSerialized) Offer {
 		PriceRur:      o.BargainTerms.PriceRur,
 		ClientFee:     o.BargainTerms.ClientFee,
 		AgentFee:      o.BargainTerms.AgentFee,
-		Price:         o.BargainTerms.Price,
+		Price:         int(o.BargainTerms.Price),
 		Deposit:       o.BargainTerms.Deposit,
 		Coords:        ConvertCoords(o.Geo.Coordinates),
 		Address:       o.Geo.UserInput,

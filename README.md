@@ -32,7 +32,9 @@ Output format is plain json array, with json objects. Single array element repre
 
 ## upload data to google sheets
 
-### Init
+### Run
 
 ```bash
+go run cmd/sheet/main.go -sheet=12google-sheets-doc-id
 ```
+

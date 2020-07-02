@@ -183,7 +183,7 @@ func colorRowRed(cli *sheets.Service, row int) error {
 		},
 	}
 
-	resp, err := cli.Spreadsheets.BatchUpdate(sheetID, req).Do()
+	_, err := cli.Spreadsheets.BatchUpdate(sheetID, req).Do()
 	if err != nil {
 		return err
 	}
@@ -197,7 +197,7 @@ func writeValue(cli *sheets.Service, row int, column int, val interface{}) error
 	}
 
 	rng := rangeOf("%v%v", letter(column), row)
-	wResp, err := cli.Spreadsheets.Values.
+	_, err := cli.Spreadsheets.Values.
 		Update(sheetID, rng, value).
 		ValueInputOption("USER_ENTERED").
 		Do()
@@ -233,7 +233,7 @@ func writeManyInRow(cli *sheets.Service, arr []sheetWrite) error {
 	}
 
 	rng := rangeOf("%v%v:%v%v", letter(mn), arr[0].row, letter(mx), arr[0].row)
-	wResp, err := cli.Spreadsheets.Values.
+	_, err := cli.Spreadsheets.Values.
 		Update(sheetID, rng, value).
 		ValueInputOption("USER_ENTERED").
 		Do()
@@ -339,7 +339,7 @@ func main() {
 			panic(err)
 		}
 
-		if len(resp.Values) == 0 {
+		if valueGet(header["CianID"], resp.Values) == "" {
 			break
 		}
 		mxLine = i
@@ -348,7 +348,8 @@ func main() {
 		currentCianID = strings.ReplaceAll(currentCianID, ",", "")
 		fromTable[currentCianID] = i
 
-		if valueGet(header["IsDeleted"]) == "TRUE" {
+		if valueGet(header["IsDeleted"], resp.Values) == "TRUE" {
+			time.Sleep(time.Second)
 			continue
 		}
 
@@ -379,6 +380,8 @@ func main() {
 		}
 
 		mxLine = mxLine + 1
+		log.Printf("Progress: line %d", mxLine)
+
 		err := updateRow(cli, mxLine, header, offer)
 		if err != nil {
 			panic(err)
